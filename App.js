@@ -24,8 +24,21 @@ export default function App() {
   const [assessmentData, setAssessmentData] = useState(null);
 
   useEffect(() => {
+    // エラーハンドリングを追加
+    const handleError = (error) => {
+      console.log('Handled error:', error.message);
+    };
+    
+    window.addEventListener('error', handleError);
+    window.addEventListener('unhandledrejection', handleError);
+    
     setupNotifications();
     loadAssessmentData();
+    
+    return () => {
+      window.removeEventListener('error', handleError);
+      window.removeEventListener('unhandledrejection', handleError);
+    };
   }, []);
 
   const setupNotifications = async () => {
