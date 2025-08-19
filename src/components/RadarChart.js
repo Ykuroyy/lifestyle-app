@@ -1,11 +1,5 @@
 import React from 'react';
-import { View, Dimensions } from 'react-native';
-import Svg, { Polygon, Circle, Text as SvgText, Line } from 'react-native-svg';
-
-const screenWidth = Dimensions.get('window').width;
-const chartSize = screenWidth - 80;
-const center = chartSize / 2;
-const maxRadius = center - 40;
+import { View, Text, StyleSheet, Dimensions } from 'react-native';
 
 const categoryNames = {
   health: '健康',
@@ -18,94 +12,131 @@ const categoryNames = {
 export default function RadarChart({ scores }) {
   if (!scores) return null;
 
-  const categories = Object.keys(scores);
-  const values = Object.values(scores);
-  const angleStep = (2 * Math.PI) / categories.length;
-
-  const getPoint = (value, index, radius = maxRadius) => {
-    const angle = index * angleStep - Math.PI / 2;
-    const scaledValue = (value / 10) * radius;
-    return {
-      x: center + scaledValue * Math.cos(angle),
-      y: center + scaledValue * Math.sin(angle),
-    };
-  };
-
-  const getLabelPoint = (index) => {
-    const angle = index * angleStep - Math.PI / 2;
-    const labelRadius = maxRadius + 25;
-    return {
-      x: center + labelRadius * Math.cos(angle),
-      y: center + labelRadius * Math.sin(angle),
-    };
-  };
-
-  const gridPoints = (level) => {
-    return categories.map((_, index) => getPoint(level, index));
-  };
-
-  const dataPoints = values.map((value, index) => getPoint(value, index));
-  const polygonPoints = dataPoints.map(p => `${p.x},${p.y}`).join(' ');
+  const data = Object.entries(scores).map(([key, value]) => ({
+    name: categoryNames[key],
+    value: value,
+  }));
 
   return (
-    <View style={{ alignItems: 'center', paddingVertical: 20 }}>
-      <Svg width={chartSize} height={chartSize}>
-        {[2, 4, 6, 8, 10].map((level) => (
-          <Polygon
-            key={level}
-            points={gridPoints(level).map(p => `${p.x},${p.y}`).join(' ')}
-            fill="none"
-            stroke="#E0E0E0"
-            strokeWidth="1"
-          />
-        ))}
-
-        {categories.map((_, index) => (
-          <Line
-            key={index}
-            x1={center}
-            y1={center}
-            x2={getPoint(10, index).x}
-            y2={getPoint(10, index).y}
-            stroke="#E0E0E0"
-            strokeWidth="1"
-          />
-        ))}
-
-        <Polygon
-          points={polygonPoints}
-          fill="rgba(255, 107, 107, 0.3)"
-          stroke="#FF6B6B"
-          strokeWidth="2"
-        />
-
-        {dataPoints.map((point, index) => (
-          <Circle
-            key={index}
-            cx={point.x}
-            cy={point.y}
-            r="4"
-            fill="#FF6B6B"
-          />
-        ))}
-
-        {categories.map((category, index) => {
-          const labelPoint = getLabelPoint(index);
+    <View style={styles.container}>
+      <Text style={styles.title}>各項目のバランス</Text>
+      
+      <View style={styles.radarContainer}>
+        {data.map((item, index) => {
+          const percentage = (item.value / 10) * 100;
           return (
-            <SvgText
-              key={category}
-              x={labelPoint.x}
-              y={labelPoint.y}
-              fontSize="12"
-              textAnchor="middle"
-              alignmentBaseline="middle"
-              fill="#333"
-            >
-              {categoryNames[category]}
-            </SvgText>
+            <View key={index} style={styles.radarItem}>
+              <View style={styles.labelContainer}>
+                <Text style={styles.categoryLabel}>{item.name}</Text>
+                <Text style={styles.scoreLabel}>{Math.round(item.value)}/10</Text>
+              </View>
+              
+              <View style={styles.progressContainer}>
+                <View style={styles.progressBackground}>
+                  <View 
+                    style={[
+                      styles.progressFill,
+                      { width: `${percentage}%` }
+                    ]} 
+                  />
+                </View>
+                <View style={styles.scaleMarkers}>
+                  {[2, 4, 6, 8, 10].map((mark) => (
+                    <View 
+                      key={mark}
+                      style={[
+                        styles.scaleMark,
+                        { left: `${(mark / 10) * 100 - 1}%` }
+                      ]}
+                    />
+                  ))}
+                </View>
+              </View>
+            </View>
           );
         })}
-      </Svg>
+      </View>
+      
+      <View style={styles.scaleLabels}>
+        <Text style={styles.scaleText}>低い</Text>
+        <Text style={styles.scaleText}>2</Text>
+        <Text style={styles.scaleText}>4</Text>
+        <Text style={styles.scaleText}>6</Text>
+        <Text style={styles.scaleText}>8</Text>
+        <Text style={styles.scaleText}>高い</Text>
+      </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    paddingVertical: 20,
+    paddingHorizontal: 20,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    textAlign: 'center',
+    marginBottom: 30,
+  },
+  radarContainer: {
+    marginBottom: 20,
+  },
+  radarItem: {
+    marginBottom: 25,
+  },
+  labelContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  categoryLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+  },
+  scoreLabel: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#FF6B6B',
+  },
+  progressContainer: {
+    position: 'relative',
+  },
+  progressBackground: {
+    height: 12,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 6,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: '#FF6B6B',
+    borderRadius: 6,
+  },
+  scaleMarkers: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 12,
+  },
+  scaleMark: {
+    position: 'absolute',
+    width: 2,
+    height: '100%',
+    backgroundColor: '#fff',
+  },
+  scaleLabels: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 5,
+  },
+  scaleText: {
+    fontSize: 12,
+    color: '#999',
+  },
+});

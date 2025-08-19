@@ -8,11 +8,8 @@ import {
   Alert,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Platform } from 'react-native';
 import PieChart from '../components/PieChart';
 import RadarChart from '../components/RadarChart';
-import WebPieChart from '../components/WebPieChart';
-import WebRadarChart from '../components/WebRadarChart';
 import { generateAdvice, getOverallBalance } from '../utils/adviceGenerator';
 
 const categoryNames = {
@@ -91,18 +88,10 @@ export default function ResultsScreen({ route }) {
         </View>
 
         <View style={styles.chart}>
-          {Platform.OS === 'web' ? (
-            chartType === 'pie' ? (
-              <WebPieChart scores={assessmentData.scores} />
-            ) : (
-              <WebRadarChart scores={assessmentData.scores} />
-            )
+          {chartType === 'pie' ? (
+            <PieChart scores={assessmentData.scores} />
           ) : (
-            chartType === 'pie' ? (
-              <PieChart scores={assessmentData.scores} />
-            ) : (
-              <RadarChart scores={assessmentData.scores} />
-            )
+            <RadarChart scores={assessmentData.scores} />
           )}
         </View>
       </View>
