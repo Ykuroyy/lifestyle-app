@@ -3,5 +3,8 @@
   "outputDirectory": "dist",
   "devCommand": "npm start",
   "installCommand": "npm install",
-  "framework": null
+  "framework": null,
+  "env": {
+    "EXPO_ROUTER_APP_ROOT": "app"
+  }
 }
