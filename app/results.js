@@ -8,9 +8,10 @@ import {
   Alert,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import PieChart from '../components/PieChart';
-import RadarChart from '../components/RadarChart';
-import { generateAdvice, getOverallBalance } from '../utils/adviceGenerator';
+import { useFocusEffect } from '@react-navigation/native';
+import PieChart from '../src/components/PieChart';
+import RadarChart from '../src/components/RadarChart';
+import { generateAdvice, getOverallBalance } from '../src/utils/adviceGenerator';
 
 const categoryNames = {
   health: '健康',
@@ -20,13 +21,15 @@ const categoryNames = {
   learning: '学び',
 };
 
-export default function ResultsScreen({ route }) {
+export default function ResultsScreen() {
   const [assessmentData, setAssessmentData] = useState(null);
   const [chartType, setChartType] = useState('pie');
 
-  useEffect(() => {
-    loadLatestAssessment();
-  }, [route.params]);
+  useFocusEffect(
+    React.useCallback(() => {
+      loadLatestAssessment();
+    }, [])
+  );
 
   const loadLatestAssessment = async () => {
     try {

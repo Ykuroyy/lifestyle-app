@@ -8,6 +8,7 @@ import {
   Alert,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
 
 const categoryNames = {
   health: '健康',
@@ -20,9 +21,11 @@ const categoryNames = {
 export default function HistoryScreen() {
   const [history, setHistory] = useState([]);
 
-  useEffect(() => {
-    loadHistory();
-  }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      loadHistory();
+    }, [])
+  );
 
   const loadHistory = async () => {
     try {
