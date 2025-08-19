@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import Slider from '@react-native-community/slider';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { router } from 'expo-router';
+import { useNavigation } from '@react-navigation/native';
 
 const categories = [
   { key: 'health', name: '健康', icon: '🏃‍♀️' },
@@ -19,7 +19,9 @@ const categories = [
   { key: 'learning', name: '学び', icon: '📚' },
 ];
 
-export default function AssessmentScreen() {
+export default function AssessmentScreen({ route }) {
+  const navigation = useNavigation();
+  const { setAssessmentData } = route.params || {};
   const [scores, setScores] = useState({
     health: 5,
     work: 5,
@@ -47,13 +49,17 @@ export default function AssessmentScreen() {
       historyArray.push(assessment);
       await AsyncStorage.setItem('assessmentHistory', JSON.stringify(historyArray));
 
+      if (setAssessmentData) {
+        setAssessmentData(assessment);
+      }
+
       Alert.alert(
         '診断完了',
         '今週のライフバランス診断が保存されました！',
         [
           {
             text: '結果を見る',
-            onPress: () => router.push('/results'),
+            onPress: () => navigation.navigate('結果'),
           },
         ]
       );
